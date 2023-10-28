@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 
-const EC_INVALID = 400;
+const { EC_NOT_FOUND } = require('./errors/constants');
 
 const app = express();
 
@@ -24,7 +24,7 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.use((req, res) => {
-  res.status(EC_INVALID).send({ message: 'Нет обработчика данного пути' });
+  res.status(EC_NOT_FOUND).send({ message: 'Нет обработчика данного пути' });
 });
 
 app.listen(PORT, () => {
