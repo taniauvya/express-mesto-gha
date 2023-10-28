@@ -1,8 +1,7 @@
 const User = require('../models/user');
 
-const EC_INVALID = 400;
-const EC_NOT_FOUND = 404;
-const EC_DEFAULT = 500;
+const { EC_NOT_FOUND, EC_DEFAULT } = require('../errors/constants');
+const { handleUpdateErr, handleCreateErr, handleGetSingleErr } = require('../errors/handlers');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -19,7 +18,7 @@ module.exports.getUser = (req, res) => {
         res.status(EC_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       }
     })
-    .catch((err) => res.status(EC_DEFAULT).send({ message: err.message }));
+    .catch((err) => handleGetSingleErr(res, err));
 };
 
 module.exports.createUser = (req, res) => {
@@ -27,14 +26,7 @@ module.exports.createUser = (req, res) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(EC_INVALID);
-      } else {
-        res.status(EC_DEFAULT);
-      }
-      res.send({ message: err.message });
-    });
+    .catch((err) => handleCreateErr(res, err));
 };
 
 module.exports.updateUser = (req, res) => {
@@ -52,14 +44,7 @@ module.exports.updateUser = (req, res) => {
         res.status(EC_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       }
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(EC_INVALID);
-      } else {
-        res.status(EC_DEFAULT);
-      }
-      res.send({ message: err.message });
-    });
+    .catch((err) => handleUpdateErr(res, err));
 };
 
 module.exports.updateAvatar = (req, res) => {
@@ -77,12 +62,5 @@ module.exports.updateAvatar = (req, res) => {
         res.status(EC_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       }
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(EC_INVALID);
-      } else {
-        res.status(EC_DEFAULT);
-      }
-      res.send({ message: err.message });
-    });
+    .catch((err) => handleUpdateErr(res, err));
 };

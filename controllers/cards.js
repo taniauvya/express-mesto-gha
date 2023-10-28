@@ -1,8 +1,7 @@
 const Card = require('../models/card');
 
-const EC_INVALID = 400;
-const EC_NOT_FOUND = 404;
-const EC_DEFAULT = 500;
+const { EC_NOT_FOUND, EC_DEFAULT } = require('../errors/constants');
+const { handleCreateErr, handleGetSingleErr } = require('../errors/handlers');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -21,7 +20,7 @@ module.exports.deleteCard = (req, res) => {
         res.status(EC_NOT_FOUND).send({ message: 'Карточка по указанному _id не найдена' });
       }
     })
-    .catch((err) => res.status(EC_DEFAULT).send({ message: err.message }));
+    .catch((err) => handleGetSingleErr(res, err));
 };
 
 module.exports.createCard = (req, res) => {
@@ -29,14 +28,7 @@ module.exports.createCard = (req, res) => {
   Card.create({ name, link, owner: req.user._id })
     .then((card) => card.populate('owner'))
     .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(EC_INVALID);
-      } else {
-        res.status(EC_DEFAULT);
-      }
-      res.send({ message: err.message });
-    });
+    .catch((err) => handleCreateErr(res, err));
 };
 
 module.exports.likeCard = (req, res) => {
@@ -53,7 +45,7 @@ module.exports.likeCard = (req, res) => {
         res.status(EC_NOT_FOUND).send({ message: 'Карточка по указанному _id не найдена' });
       }
     })
-    .catch((err) => res.status(EC_DEFAULT).send({ message: err.message }));
+    .catch((err) => handleGetSingleErr(res, err));
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -70,5 +62,5 @@ module.exports.dislikeCard = (req, res) => {
         res.status(EC_NOT_FOUND).send({ message: 'Карточка по указанному _id не найдена' });
       }
     })
-    .catch((err) => res.status(EC_DEFAULT).send({ message: err.message }));
+    .catch((err) => handleGetSingleErr(res, err));
 };
