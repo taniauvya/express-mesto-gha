@@ -1,24 +1,22 @@
 const User = require('../models/user');
 
-const { EC_NOT_FOUND, EC_DEFAULT } = require('../errors/constants');
-const { handleUpdateErr, handleCreateErr, handleGetSingleErr } = require('../errors/handlers');
+const {
+  handleUpdateErr, handleCreateErr, handleGetSingleErr, handleGeneralError,
+} = require('../errors/handlers');
+
+const notFoundMsg = 'Пользователь по указанному _id не найден';
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(EC_DEFAULT).send({ message: err.message }));
+    .catch((err) => handleGeneralError(res, err));
 };
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
-    .then((user) => {
-      if (user) {
-        res.send(user);
-      } else {
-        res.status(EC_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
-      }
-    })
-    .catch((err) => handleGetSingleErr(res, err));
+    .orFail()
+    .then((user) => res.send(user))
+    .catch((err) => handleGetSingleErr(res, err, notFoundMsg));
 };
 
 module.exports.createUser = (req, res) => {
@@ -26,41 +24,26 @@ module.exports.createUser = (req, res) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.send(user))
-    .catch((err) => handleCreateErr(res, err));
+    .catch((err) => handleCreateErr(res, err, notFoundMsg));
 };
 
-module.exports.updateUser = (req, res) => {
-  const { name, about } = req.body;
-
-  User.findByIdAndUpdate(req.user._id, { name, about }, {
+function updateUser(req, res, updateObj) {
+  User.findByIdAndUpdate(req.user._id, updateObj, {
     new: true, // обработчик then получит на вход обновлённую запись
     runValidators: true, // данные будут валидированы перед изменением
     upsert: false, // если пользователь не найден, он не будет создан
   })
-    .then((user) => {
-      if (user) {
-        res.send(user);
-      } else {
-        res.status(EC_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
-      }
-    })
-    .catch((err) => handleUpdateErr(res, err));
+    .orFail()
+    .then((user) => res.send(user))
+    .catch((err) => handleUpdateErr(res, err, notFoundMsg));
+}
+
+module.exports.updateUser = (req, res) => {
+  const { name, about } = req.body;
+  updateUser(req, res, { name, about });
 };
 
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
-
-  User.findByIdAndUpdate(req.user._id, { avatar }, {
-    new: true, // обработчик then получит на вход обновлённую запись
-    runValidators: true, // данные будут валидированы перед изменением
-    upsert: false, // если пользователь не найден, он не будет создан
-  })
-    .then((user) => {
-      if (user) {
-        res.send(user);
-      } else {
-        res.status(EC_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
-      }
-    })
-    .catch((err) => handleUpdateErr(res, err));
+  updateUser(req, res, { avatar });
 };
