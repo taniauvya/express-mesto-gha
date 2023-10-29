@@ -8,6 +8,15 @@ const app = express();
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
 app.use(express.json());
+
+app.use((req, res, next) => {
+  req.user = {
+    _id: '653cf25f3bbb44f82c33ba14', // вставьте сюда _id созданного в предыдущем пункте пользователя
+  };
+
+  next();
+});
+
 app.use(require('./routes/index'));
 
 app.listen(PORT, () => {
