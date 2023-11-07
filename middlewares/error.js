@@ -8,14 +8,16 @@ const {
 } = require('../errors/constants');
 
 function JoiErrToMsg(joiErr) {
-  const msg = {};
+  const msg = { statusCode: EC_INVALID, error: 'Bad Request', message: joiErr.message };
+  const validation = {};
   joiErr.details.forEach((v, k) => {
-    const msjObj = {};
+    validation.source = k;
+    validation.items = [];
     Object.values(v.details).forEach((e) => {
-      msjObj[e.path[0]] = e.message;
+      validation.items = [...validation.items, ...e.path];
     });
-    msg[k] = msjObj;
   });
+  msg.validation = validation;
   return msg;
 }
 
