@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { linkRx } = require('../validations/constants');
 
 const schema = new mongoose.Schema({
   name: {
@@ -10,6 +11,9 @@ const schema = new mongoose.Schema({
   link: {
     type: String,
     required: true,
+    validate: {
+      validator: (val) => linkRx.test(val),
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
