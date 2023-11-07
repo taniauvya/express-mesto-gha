@@ -7,14 +7,26 @@ const {
   EC_INVALID, EC_NOT_FOUND, EC_DEFAULT, EC_EMAIL_DUP,
 } = require('../errors/constants');
 
+function JoiErrToMsg(joiErr) {
+  const msg = {};
+  joiErr.details.forEach((v, k) => {
+    const msjObj = {};
+    Object.values(v.details).forEach((e) => {
+      msjObj[e.path[0]] = e.message;
+    });
+    msg[k] = msjObj;
+  });
+  return msg;
+}
+
 /* eslint-disable no-unused-vars */
 module.exports = (err, req, res, next) => {
-/* eslint-enable no-unused-vars */
+  /* eslint-enable no-unused-vars */
 
   if (err instanceof AuthError || err instanceof UnathorizedError) {
     res.status(err.statusCode).send({ message: err.message });
   } else if (isCelebrateError(err)) {
-    res.status(EC_INVALID).send({ message: err.details.get('body').toString() });
+    res.status(EC_INVALID).send(JoiErrToMsg(err));
   } else if (err instanceof ValidationError) {
     res.status(EC_INVALID).send({ message: err.message });
   } else if (err instanceof CastError) {

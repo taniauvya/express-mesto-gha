@@ -2,6 +2,7 @@ const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 
 const { EC_NOT_FOUND } = require('../errors/constants');
+const { linkRx } = require('../validations/constants');
 
 const {
   login, createUser,
@@ -18,7 +19,13 @@ router.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string(),
+    avatar: Joi.string().required().custom((value, helpers) => {
+      if (!linkRx.test(value)) {
+        return helpers.message('Некорректная ссылка');
+      }
+
+      return value;
+    }),
     email: Joi.string().required(),
     password: Joi.string().required(),
   }),

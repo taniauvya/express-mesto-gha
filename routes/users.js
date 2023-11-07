@@ -3,7 +3,7 @@ const { celebrate, Joi } = require('celebrate');
 const {
   getUsers, getUser, getSelfUser, updateUser, updateAvatar,
 } = require('../controllers/users');
-const { MONGO_ID_LENGTH } = require('../validations/constants');
+const { MONGO_ID_LENGTH, linkRx } = require('../validations/constants');
 
 router.get('/', getUsers);
 
@@ -24,7 +24,13 @@ router.patch('/me', celebrate({
 
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required(),
+    avatar: Joi.string().required().custom((value, helpers) => {
+      if (!linkRx.test(value)) {
+        return helpers.message('Некорректная ссылка');
+      }
+
+      return value;
+    }),
   }),
 }), updateAvatar);
 

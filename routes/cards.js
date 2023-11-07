@@ -3,7 +3,7 @@ const { celebrate, Joi } = require('celebrate');
 const {
   getCards, deleteCard, createCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
-const { MONGO_ID_LENGTH } = require('../validations/constants');
+const { MONGO_ID_LENGTH, linkRx } = require('../validations/constants');
 
 router.get('/', getCards);
 
@@ -16,7 +16,13 @@ router.delete('/:cardId', celebrate({
 router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required(),
+    link: Joi.string().required().custom((value, helpers) => {
+      if (!linkRx.test(value)) {
+        return helpers.message('Некорректная ссылка');
+      }
+
+      return value;
+    }),
   }),
 }), createCard);
 
