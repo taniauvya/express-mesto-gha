@@ -13,7 +13,7 @@ module.exports.login = (req, res, next) => {
         // token - наш JWT токен, который мы отправляем
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-      }).end();
+      }).send({ token });
     })
     .catch(next);
 };
@@ -47,7 +47,12 @@ module.exports.createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send(user))
+    .then((user) => {
+      /* eslint-disable no-shadow */
+      const { password, ...userProps } = user._doc;
+      /* eslint-enable no-shadow */
+      return res.send(userProps);
+    })
     .catch(next);
 };
 

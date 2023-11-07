@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+const validator = require('validator');
 
 const { EC_NOT_FOUND } = require('../errors/constants');
 const { linkRx } = require('../validations/constants');
@@ -10,7 +11,13 @@ const {
 
 router.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required(),
+    email: Joi.string().required().custom((value, helpers) => {
+      if (!validator.isEmail(value)) {
+        return helpers.message('Некорректный email');
+      }
+
+      return value;
+    }),
     password: Joi.string().required(),
   }),
 }), login);
@@ -19,14 +26,20 @@ router.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string().required().custom((value, helpers) => {
+    avatar: Joi.string().custom((value, helpers) => {
       if (!linkRx.test(value)) {
         return helpers.message('Некорректная ссылка');
       }
 
       return value;
     }),
-    email: Joi.string().required(),
+    email: Joi.string().required().custom((value, helpers) => {
+      if (!validator.isEmail(value)) {
+        return helpers.message('Некорректный email');
+      }
+
+      return value;
+    }),
     password: Joi.string().required(),
   }),
 }), createUser);

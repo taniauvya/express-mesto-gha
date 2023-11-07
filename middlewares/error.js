@@ -12,9 +12,9 @@ function JoiErrToMsg(joiErr) {
   const validation = {};
   joiErr.details.forEach((v, k) => {
     validation.source = k;
-    validation.items = [];
+    validation.keys = [];
     Object.values(v.details).forEach((e) => {
-      validation.items = [...validation.items, ...e.path];
+      validation.keys = [...validation.keys, ...e.path];
     });
   });
   msg.validation = validation;
