@@ -16,13 +16,7 @@ router.delete('/:cardId', celebrate({
 router.post('/', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    link: Joi.string().required().custom((value, helpers) => {
-      if (!linkRx.test(value)) {
-        return helpers.message('Некорректная ссылка');
-      }
-
-      return value;
-    }),
+    link: Joi.string().required().pattern(linkRx),
   }),
 }), createCard);
 

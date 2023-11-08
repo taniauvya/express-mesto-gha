@@ -1,9 +1,12 @@
 const Card = require('../models/card');
 const UnathorizedError = require('../errors/UnathorizedError');
 
+const { handleUpdateErr, handleCreateErr, handleGetSingleErr } = require('../errors/handlers');
+
+const notFoundMessage = 'Карточка с данным ID не найдена';
+
 module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .populate(['likes', 'owner'])
     .then((cards) => res.send(cards))
     .catch(next);
 };
@@ -13,23 +16,21 @@ module.exports.deleteCard = (req, res, next) => {
     .orFail()
     .then((card) => {
       if (card.owner._id.toString() !== req.user._id) {
-        return Promise.reject(new UnathorizedError('Нельзя удалить чужую карточку'));
+        throw new UnathorizedError('Нельзя удалить чужую карточку');
       }
 
       return card;
     })
-    .then((card) => card.populate(['likes', 'owner']))
     .then((card) => card.deleteOne())
     .then((card) => res.send(card))
-    .catch(next);
+    .catch((err) => handleGetSingleErr(next, err, notFoundMessage));
 };
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => card.populate('owner'))
     .then((card) => res.send(card))
-    .catch(next);
+    .catch((err) => handleCreateErr(next, err));
 };
 
 function changeCardLike(req, res, next, doLike) {
@@ -39,9 +40,8 @@ function changeCardLike(req, res, next, doLike) {
     { new: true },
   )
     .orFail()
-    .populate(['likes', 'owner'])
     .then((card) => res.send(card))
-    .catch(next);
+    .catch((err) => handleUpdateErr(next, err, notFoundMessage));
 }
 
 module.exports.likeCard = (req, res, next) => changeCardLike(req, res, next, true);

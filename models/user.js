@@ -38,20 +38,20 @@ const schema = new mongoose.Schema({
   },
 });
 
-const handleError = () => Promise.reject(new AuthError('Неправильные почта или пароль'));
-
 function findUserByCredentials(email, password) {
   return this.findOne({ email }).select('+password')
-    .orFail()
-    .catch(handleError)
-    .then((user) => bcrypt.compare(password, user.password)
-      .then((matched) => {
-        if (!matched) {
-          return handleError();
-        }
+    .then((user) => {
+      if (!user) { throw new AuthError('Неправильные почта или пароль1'); }
 
-        return user;
-      }));
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new AuthError('Неправильные почта или пароль');
+          }
+
+          return user;
+        });
+    });
 }
 schema.statics.findUserByCredentials = findUserByCredentials;
 

@@ -24,13 +24,7 @@ router.patch('/me', celebrate({
 
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().custom((value, helpers) => {
-      if (!linkRx.test(value)) {
-        return helpers.message('Некорректная ссылка');
-      }
-
-      return value;
-    }),
+    avatar: Joi.string().required().pattern(linkRx),
   }),
 }), updateAvatar);
 

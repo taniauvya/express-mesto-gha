@@ -1,6 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const { handleUpdateErr, handleCreateErr, handleGetSingleErr } = require('../errors/handlers');
+
+const notFoundMessage = 'Пользователь с данным ID не найден';
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
@@ -28,14 +31,14 @@ module.exports.getSelfUser = (req, res, next) => {
   User.findById(req.user._id)
     .orFail()
     .then((user) => res.send(user))
-    .catch(next);
+    .catch((err) => handleGetSingleErr(next, err, notFoundMessage));
 };
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail()
     .then((user) => res.send(user))
-    .catch(next);
+    .catch((err) => handleGetSingleErr(next, err, notFoundMessage));
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -53,7 +56,7 @@ module.exports.createUser = (req, res, next) => {
       /* eslint-enable no-shadow */
       return res.send(userProps);
     })
-    .catch(next);
+    .catch((err) => handleCreateErr(next, err));
 };
 
 function updateUser(req, res, next, updateObj) {
@@ -64,7 +67,7 @@ function updateUser(req, res, next, updateObj) {
   })
     .orFail()
     .then((user) => res.send(user))
-    .catch(next);
+    .catch((err) => handleUpdateErr(next, err, notFoundMessage));
 }
 
 module.exports.updateUser = (req, res, next) => {

@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
+const { errors } = require('celebrate');
+
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
 
@@ -12,6 +14,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(require('./routes/index'));
+
+app.use(errors());
+app.use(require('./middlewares/error'));
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает

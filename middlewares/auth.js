@@ -7,8 +7,8 @@ module.exports = (req, res, next) => {
   try {
     req.user = jwt.verify(token, 'super-strong-secret');
   } catch (err) {
-    throw new AuthError('Необходима авторизация');
+    return next(new AuthError('Необходима авторизация'));
   }
 
-  next(); // пропускаем запрос дальше
+  return next(); // пропускаем запрос дальше
 };
