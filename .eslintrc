@@ -1,6 +1,9 @@
 {
   "extends": "airbnb-base",
-    "rules": {
-      "no-underscore-dangle": "off"
-   }
+  "rules": {
+    "no-underscore-dangle": "off"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  }
 }
