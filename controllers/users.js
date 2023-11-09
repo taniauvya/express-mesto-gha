@@ -1,7 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { handleUpdateErr, handleCreateErr, handleGetSingleErr } = require('../errors/handlers');
+const { handleUpdateErr, handleCreateDupErr, handleGetSingleErr } = require('../errors/handlers');
 
 const notFoundMessage = 'Пользователь с данным ID не найден';
 
@@ -56,7 +56,7 @@ module.exports.createUser = (req, res, next) => {
       /* eslint-enable no-shadow */
       return res.send(userProps);
     })
-    .catch((err) => handleCreateErr(next, err));
+    .catch((err) => handleCreateDupErr(next, err));
 };
 
 function updateUser(req, res, next, updateObj) {
